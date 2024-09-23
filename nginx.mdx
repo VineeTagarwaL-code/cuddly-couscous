@@ -1,0 +1,27 @@
+---
+title: "Why Nginx ?"
+description: "Why nginx is even needed ? "
+date: "2023-12-30"
+tags: ["self-hosting", "devops", "nginx", "sre"]
+---
+
+![image](https://github.com/user-attachments/assets/e7a541d9-bdef-4c25-91ab-3a839a50785a)
+
+# What is NGINX?
+
+Created by  Igor Sysoev in 2004 to solve the C10K problem NGINX is an open source, high performance web server that can also function as reverse proxy, web server, http cache, load balancer etc. It's designed to handle high concurrency with 
+minial resource usage. It uses an event driven, asynchronous architecture that allows it to efficiently manage thousands or lets say millions of concurrent requests or connections
+
+# NGINX server architecture
+NGINX uses a predictable process model that is sensitive to available hardware resources:
+
+- The master process performs privileged tasks such as reading configuration and binding ports, and spawns a small number of child processes.
+- The cache loader process runs at startup to load the disk-based cache into memory, and then exits. Because it is scheduled sparingly, it has low resource requirements.
+- The cache manager process runs periodically to remove entries from the disk cache, keeping it within the configured size.
+- Worker processes do the day-to-day work of the NGINX web server. They handle network connections, read and write disk content, and communicate with upstream servers.
+
+In most cases, the recommended NGINX configuration of one worker process per CPU core makes the most efficient use of hardware resources. It can be customized by setting the worker_processes directive in NGINX configuration.
+
+When the NGINX server is active, only the worker process is busy. Each worker process handles multiple connections in a non-blocking manner, reducing the number of context switches.
+
+Each worker process is single-threaded and runs independently to acquire and process new connections. Processes can communicate using shared memory to obtain shared cache data, session persistent data, and other shared resources.
