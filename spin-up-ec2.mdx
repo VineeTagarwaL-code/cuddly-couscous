@@ -1,0 +1,49 @@
+---
+title: "How to correctly setup your vps ?  "
+description: "In this blog, I will guide you through the correct way to setup your vps to host your websites correctly !"
+date: "2023-12-30"
+tags: ["self-hosting", "vps", "nginx", "pm2"]
+---
+
+<details>
+  <summary>Content</summary>
+
+  - [What is a VPS?](#what-is-a-vps)
+  - Item 2
+  - Item 3
+
+</details>
+
+# What is a vps ? 
+A VPS (Virtual Private Server) is a type of hosting service that provides a virtualized server environment. It acts like a dedicated physical server, but it is actually a virtual machine created by partitioning a physical server into multiple virtual servers. Each VPS runs its own operating system and has its own dedicated resources, such as CPU, RAM, and storage, which are isolated from other VPS instances on the same physical server.
+# Setting up vps
+Before starting, make sure you have your vps ready. So lets start !
+ - ### Update your server
+   Once you've logged into your VPS via SSH, the first step is to update your package lists to ensure you're working with the latest versions.
+   
+   ```shell
+    sudo apt update && sudo apt upgrade -y
+   ```
+ - ### Setup user account
+   Whenever you login to a new vps, always setup an user account. Its not a great idea to work as root user
+      ```shell
+    sudo adduser vineet # your username
+    sudo usermod -aG sudo vineet # to add sudo perm to your user
+    su - vineet # to switch to your new user
+   ```
+ - ### SSH using new user
+   As we have already setup the new user, we should now setup ssh login for that user
+   ```shell
+   # follow these steps after completing the previous one
+   mkdir -p ~/.ssh
+   chmod 700 ~/.ssh
+   sudo cp /home/ec2-user/.ssh/authorized_keys /home/new-user/.ssh/
+   sudo chown new-user:new-user /home/new-user/.ssh/authorized_keys
+   chmod 600 /home/new-user/.ssh/authorized_keys
+   ```
+   Now logout and try to login back as new-user@ip
+ - 
+
+
+# Installing necessary softwares
+ 
