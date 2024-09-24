@@ -9,7 +9,7 @@ tags: ["self-hosting", "vps", "nginx", "pm2"]
   <summary>Content</summary>
 
   - [What is a VPS?](#what-is-a-vps)
-  - Item 2
+  - [Setting up vps](#setting-up-vps)
   - Item 3
 
 </details>
@@ -37,15 +37,64 @@ Before starting, make sure you have your vps ready. So lets start !
    As we have already setup the new user, we should now setup ssh login for that user
    ```shell
    # follow these steps after completing the previous one
-   mkdir -p ~/.ssh
-   chmod 700 ~/.ssh
-   sudo cp /home/ec2-user/.ssh/authorized_keys /home/new-user/.ssh/
-   sudo chown new-user:new-user /home/new-user/.ssh/authorized_keys
+   mkdir -p ~/.ssh # make a .ssh folder 
+   chmod 700 ~/.ssh # add permission to execute 
+   sudo cp /home/ec2-user/.ssh/authorized_keys /home/new-user/.ssh/ # copy your ssh key and paste in new user's ssh folder
+   sudo chown new-user:new-user /home/new-user/.ssh/authorized_keys # changing the ownership of the file 
    chmod 600 /home/new-user/.ssh/authorized_keys
    ```
    Now logout and try to login back as new-user@ip
- - 
-
-
-# Installing necessary softwares
  
+# Installing necessary softwares
+
+To host your web applications on a VPS, you'll need a few essential software packages. we will cover how to install Node.js, PM2, Nginx, and Certbot. These tools will help you deploy, manage, and secure your applications. For demonstration purposes, we'll be deploying a Next.js project, which requires Node.js. However, you should install the software based on your specific application needs.
+
+- ### Installing Nodejs
+  Since we are deploying a Next.js project in this example, we will need to install Node.js. However, you should install whatever runtime environment suits your project (such as Python,   Ruby, etc.).
+
+  ```shell
+  curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.0/install.sh | bash # downloads the .sh file to continue installation 
+  source ~/.bashrc # activate your nvm 
+  nvm intall --lts # install the latest LTS version of node
+  ```
+
+- ### Installing PM2
+  PM2 is a production process manager for Node.js applications. It helps you keep your app running, even after a server reboot.
+
+  ```shell
+   npm install -g pm2
+  ```
+- ### Installing NGINX
+  Nginx is a high-performance web server that you can use as a reverse proxy to serve your application.
+  ```shell
+   snap install nginx
+   systemctl start nginx
+   systemctl enable nginx
+  ```
+- ### Configuring NGINX
+  Now we need to configure our reverse proxy to allow Nginx to forward incoming requests directed to the "server_name" to the local port where your application is running, as specified    in the Nginx configuration.
+  ```shell
+  sudo nano /etc/nginx/sites-available/default
+  ```
+  ```shell 
+   server{ 
+            
+   listen 80;
+   server_name blog.vineet.tech;
+            
+   location / { 
+         proxy_pass http://localhost:3000; # Change 3000 to the port your app is running on
+         proxy_http_version 1.1;
+         proxy_set_header Upgrade $http_upgrade;
+         proxy_set_header Connection 'upgrade';
+         proxy_set_header Host $host;
+         proxy_cache_bypass $http_upgrade;
+        }
+    }
+  ```
+  After the above chagnes are made, we should test if there are any syntax errors or not and then restart nginx 
+   ```shell
+     nginx -t # checks for errors 
+     systemctl restart nginx
+   ```
+  
