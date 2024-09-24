@@ -39,8 +39,8 @@ Before starting, make sure you have your vps ready. So lets start !
    # follow these steps after completing the previous one
    mkdir -p ~/.ssh # make a .ssh folder 
    chmod 700 ~/.ssh # add permission to execute 
-   sudo cp /home/ec2-user/.ssh/authorized_keys /home/new-user/.ssh/ # copy your ssh key and paste in new user's ssh folder
-   sudo chown new-user:new-user /home/new-user/.ssh/authorized_keys # changing the ownership of the file 
+   sudo cp /home/ec2-user/.ssh/authorized_keys /home/new-user/.ssh/ # paste in new user's ssh folder
+   sudo chown new-user:new-user /home/new-user/.ssh/authorized_keys # changing the ownership 
    chmod 600 /home/new-user/.ssh/authorized_keys
    ```
    Now logout and try to login back as new-user@ip
@@ -53,7 +53,7 @@ To host your web applications on a VPS, you'll need a few essential software pac
   Since we are deploying a Next.js project in this example, we will need to install Node.js. However, you should install whatever runtime environment suits your project (such as Python,   Ruby, etc.).
 
   ```shell
-  curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.0/install.sh | bash # downloads the .sh file to continue installation 
+  curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.0/install.sh | bash 
   source ~/.bashrc # activate your nvm 
   nvm intall --lts # install the latest LTS version of node
   ```
