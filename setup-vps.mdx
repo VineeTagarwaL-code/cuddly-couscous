@@ -1,56 +1,73 @@
 ---
-title: "How to correctly setup your vps ?  "
-description: "In this blog, I will guide you through the correct way to setup your vps to host your websites correctly !"
+title: "How to Correctly Set Up Your VPS?"
+description: "In this blog, I will guide you through the correct way to set up your VPS to host your websites efficiently!"
 date: "2023-12-30"
 tags: ["self-hosting", "vps", "nginx", "pm2"]
 ---
 
-<details>
-  <summary>Content</summary>
 
+<details>
+  <summary>Content & Prerequisites</summary>
+
+  ## Prerequisites
+
+  - A VPS (Virtual Private Server) already set up.
+  - Basic understanding of Linux commands and terminal usage.
+  - A domain name pointed to your VPS IP address (for SSL certification).
+  - SSH access to your VPS with a non-root user.
+
+  ## Content Overview
   - [What is a VPS?](#what-is-a-vps)
-  - [Setting up vps](#setting-up-vps)
-  - Item 3
+  - [Setting up VPS](#setting-up-vps)
+  - [Installing necessary software](#installing-necessary-software)
+  - [Starting your app](#starting-your-app)
+  - [SSL Certification](#ssl-certification)
+  - [Conclusion](#conclusion)
 
 </details>
 <br></br>
 
-# What is a vps ? 
 
-A VPS (Virtual Private Server) is a type of hosting service that provides a virtualized server environment. It acts like a dedicated physical server, but it is actually a virtual machine created by partitioning a physical server into multiple virtual servers. Each VPS runs its own operating system and has its own dedicated resources, such as CPU, RAM, and storage, which are isolated from other VPS instances on the same physical server.
-# Setting up vps
-Before starting, make sure you have your vps ready. So lets start !
- - ### Update your server
-   Once you've logged into your VPS via SSH, the first step is to update your package lists to ensure you're working with the latest versions.
-   
-   ```shell
-    sudo apt update && sudo apt upgrade -y
-   ```
+# What is a VPS?
+
+A VPS (Virtual Private Server) is a type of hosting service that provides a virtualized server environment. It acts like a dedicated physical server but is actually a virtual machine created by partitioning a physical server into multiple virtual servers. Each VPS runs its own operating system and has dedicated resources, such as CPU, RAM, and storage, which are isolated from other VPS instances on the same physical server.
+
+# Setting up VPS
+
+Before starting, ensure your VPS is ready. Let’s get started!
+
+- ### Update Your Server
+
+  Once you've logged into your VPS via SSH, the first step is to update your package lists to ensure you're working with the latest versions.
+  
+  ```bash
+  sudo apt update && sudo apt upgrade -y
+  ```
  - ### Setup user account
-   Whenever you login to a new vps, always setup an user account. Its not a great idea to work as root user
+   Whenever you log in to a new VPS, always set up a user account. It's not a good idea to work as the root user.
       ```shell
-    sudo adduser vineet # your username
-    sudo usermod -aG sudo vineet # to add sudo perm to your user
-    su - vineet # to switch to your new user
+    sudo adduser vineet # replace with your username
+    sudo usermod -aG sudo vineet # grant sudo privileges to your user
+    su - vineet # switch to your new user
    ```
  - ### SSH using new user
-   As we have already setup the new user, we should now setup ssh login for that user
+   Now that we've set up the new user, we should configure SSH login for that user.
    ```shell
    # follow these steps after completing the previous one
-   mkdir -p ~/.ssh # make a .ssh folder 
-   chmod 700 ~/.ssh # add permission to execute 
-   sudo cp /home/ec2-user/.ssh/authorized_keys /home/new-user/.ssh/ # paste in new user's ssh folder
-   sudo chown new-user:new-user /home/new-user/.ssh/authorized_keys # changing the ownership 
+   mkdir -p ~/.ssh # create the .ssh directory
+   chmod 700 ~/.ssh # set permissions for the directory
+   sudo cp /home/ec2-user/.ssh/authorized_keys /home/new-user/.ssh/ # copy SSH keys to the new user's .ssh folder
+   sudo chown new-user:new-user /home/new-user/.ssh/authorized_keys # change ownership of the keys
    chmod 600 /home/new-user/.ssh/authorized_keys
    ```
-   Now logout and try to login back as new-user@ip
+   Now, log out and try logging back in as new-user@your-ip-address.
  
 # Installing necessary softwares
 
-To host your web applications on a VPS, you'll need a few essential software packages. we will cover how to install Node.js, PM2, Nginx, and Certbot. These tools will help you deploy, manage, and secure your applications. For demonstration purposes, we'll be deploying a Next.js project, which requires Node.js. However, you should install the software based on your specific application needs.
+To host your web applications on a VPS, you'll need some essential software. We'll cover how to install Node.js, PM2, Nginx, and Certbot. These tools will help you deploy, manage, and secure your applications. For this demonstration, we'll deploy a Next.js project, but you should install software based on your specific application's needs.
 
 - ### Installing Nodejs
-  Since we are deploying a Next.js project in this example, we will need to install Node.js. However, you should install whatever runtime environment suits your project (such as Python,   Ruby, etc.).
+  Since we're deploying a Next.js project, we need Node.js. However, feel free to install the runtime environment that suits your project (such as Python, Ruby, etc.).
 
   ```shell
   curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.0/install.sh | bash 
@@ -59,8 +76,7 @@ To host your web applications on a VPS, you'll need a few essential software pac
   ```
 
 - ### Installing PM2
-  PM2 is a production process manager for Node.js applications. It helps you keep your app running, even after a server reboot.
-
+PM2 is a production process manager for Node.js applications. It helps keep your app running, even after a server reboot.
   ```shell
    npm install -g pm2
   ```
@@ -76,6 +92,7 @@ To host your web applications on a VPS, you'll need a few essential software pac
   ```shell
   sudo nano /etc/nginx/sites-available/default
   ```
+  Edit the file as follows  
   ```shell 
    server{ 
             
@@ -92,7 +109,7 @@ To host your web applications on a VPS, you'll need a few essential software pac
         }
     }
   ```
-  After the above chagnes are made, we should test if there are any syntax errors or not and then restart nginx 
+  After making these changes, check for any syntax errors and restart Nginx:
    ```shell
      nginx -t # checks for errors 
      systemctl restart nginx
@@ -130,3 +147,37 @@ module.exports = {
   ],
 };
 ```
+After the above file is saved, run pm2 start
+```shell
+  pm2 start ecosystem.config.js # to start your app 
+  pm2 save # saves the current PM2 process list to a file so that PM2 can automatically restore these processes after a reboot or restart.
+```
+> Please ensure that the port your app is running on is correctly configured in the Nginx configuration. Additionally, verify that your domain is properly pointed to the VPS IP address
+
+My blog app is now hosted and available, but it isn't accessible over HTTPS due to the absence of an SSL certificate
+
+![image](https://github.com/user-attachments/assets/3da6fe7c-cd8b-4ec3-a85b-8586c36b57a3)
+![image](https://github.com/user-attachments/assets/d597b0a9-f4d8-48f3-8232-239dcadb71f3)
+
+# SSL certification 
+Our blog app is now hosted and accessible, but it's currently not available over HTTPS due to the absence of an SSL certificate. To enable HTTPS, we will use **Certbot**, a free, open-source tool that automates the process of obtaining and renewing SSL certificates via Let's Encrypt.
+
+### Why Certbot?
+Certbot makes it easy to secure your website with an SSL certificate. It automatically fetches and renews certificates and configures Nginx (or other web servers) to use them, enabling HTTPS for your domain
+
+Let's get started.
+
+```shell
+ sudo apt-get remove certbot # remove the pre existing certbot
+ sudo snap install --classic certbot # install certbot 
+ sudo ln -s /snap/bin/certbot /usr/bin/certbot # prepare the certbot command 
+ sudo certbot --nginx # answer all the prompts 
+```
+Once you've correctly answered all the prompts during the Certbot setup, you will be prompted to select the domain(s) for which you want to enable SSL. Choose your preferred domain(s), and Certbot will proceed to generate and install the SSL certificate. Once complete, your website will be fully secured over HTTPS
+
+![image](https://github.com/user-attachments/assets/35ac3aab-2c60-474c-ab3b-9f8236019ba9)
+
+# Conclusion 
+By following the steps in this guide, you've successfully set up your VPS, configured essential software, deployed your blog application using PM2, and secured it with an SSL certificate via Certbot. You can now run your applications efficiently and securely on your VPS.
+
+Keep this setup in mind for future VPS-based projects and adjust the software stack based on the application requirements.
