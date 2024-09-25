@@ -97,4 +97,36 @@ To host your web applications on a VPS, you'll need a few essential software pac
      nginx -t # checks for errors 
      systemctl restart nginx
    ```
-  
+- ### Installing Git
+  ```shell
+   apt-get install git 
+  ```
+- ### Configuring git login through ssh
+  We need to log in to our GitHub account on the VPS to access private repositories (if any) via SSH.
+  ```shell
+  cd ~/.ssh # go to your .ssh folder
+  ssh-keygen -o -t rsa -C "email@example.com" # use the kye-gen command to generate the key pairs
+  cat id_rsa.pub # Run `cat id_rsa.pub` and add the displayed key to your GitHub account under SSH keys.
+  ```
+
+# Starting your app 
+For now, I'm starting the blog app that you're currently reading, and I'll be using PM2 to manage the process and handle restarts. Since I'm using PM2, I’ll create an ecosystem.config.js file to simplify starting and stopping processes.
+
+```js
+# root_of_your_project/ecosystem.config.js
+
+module.exports = {
+  apps: [
+    {
+      name: "blog",
+      exec_mode: "fork",
+      instances: "1",
+      script: "./node_modules/next/dist/bin/next",
+      args: "start",
+      exp_backoff_restart_delay: 100,
+      watch: true,
+      max_memory_restart: "400M",
+    },
+  ],
+};
+```
