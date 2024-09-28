@@ -118,7 +118,7 @@ CMD ["npm", "start"]
    ```
 # Dockerizing a nextjs app 
 Now that we’re familiar with Docker and Dockerfile, let's create a Docker image for a Next.js application. Below is the Dockerfile we’ll be using for this process.
-```dockefile
+```dockerfile
 FROM node:20
 
 WORKDIR /app
@@ -285,7 +285,7 @@ After executing the build command with the provided Dockerfile, the resulting im
 2. **Multistage Builds**: Docker allows you to use multiple phases in the Dockerfile to optimize the build process and reduce the final image size. By defining separate stages, such as one for installing dependencies, another for building the application, and a final stage for running it, you can ensure that only the essential files and dependencies are included in the final image. This approach avoids bloating the production image with build tools and unnecessary files, improving efficiency and performance. Each stage can selectively copy artifacts from previous stages, making the final image lean and more suitable for deployment.
 
       Here's the dockerfile that uses multistage build:
-   ```bash
+   ```dockerfile
    FROM node:20-alpine AS deps
    
    WORKDIR /app
