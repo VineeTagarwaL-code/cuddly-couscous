@@ -83,37 +83,37 @@ CMD ["npm", "start"]
 ### So what does every line mean ? 
 
 1. **`FROM`**: This specifies the base image from which the Docker image will be built. It is often an existing official image like a Linux distribution or a language runtime (e.g., `node`, `python`).
-   ```dockerfile
+   ```bash
    FROM node:16
    ```
 
 2. **`COPY`** or **`ADD`**: These commands copy files from your local file system to the Docker image.
-   ```dockerfile
+   ```bash
    COPY . /app
    ```
 
 3. **`WORKDIR`**: Sets the working directory inside the container. All subsequent commands (e.g., `RUN`, `COPY`) will be executed relative to this path.
-   ```dockerfile
+   ```bash
    WORKDIR /app
    ```
 
 4. **`RUN`**: Executes a command inside the image. It is typically used to install dependencies or set up the environment.
-   ```dockerfile
+   ```bash
    RUN npm install
    ```
 
 5. **`EXPOSE`**: Informs Docker which port the container will listen on. This is more of a documentation feature, as it does not actually publish the port; you'd need to do that using `docker run -p`.
-   ```dockerfile
+   ```bash
    EXPOSE 3000
    ```
 
 6. **`ENV`**: Sets environment variables that will be available to the running container.
-   ```dockerfile
+   ```bash
    ENV NODE_ENV=production
    ```
 
 7. **`CMD`**: Specifies the default command to run when the container starts. If this is overridden at runtime 
-   ```dockerfile
+   ```bash
    CMD ["npm", "start"]
    ```
 # Dockerizing a nextjs app 
@@ -325,7 +325,7 @@ After executing the build command with the provided Dockerfile, the resulting im
       ---
       
       ### Stage 1: `deps`
-      ```dockerfile
+      ```bash
       FROM node:20-alpine AS deps
       
       WORKDIR /app
@@ -369,7 +369,7 @@ After executing the build command with the provided Dockerfile, the resulting im
       ---
       
       ### Stage 3: `runner`
-      ```dockerfile
+      ```bash
       FROM node:20-alpine AS runner
       
       WORKDIR /app
