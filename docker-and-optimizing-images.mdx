@@ -58,7 +58,7 @@ A Dockerfile is a text file containing a set of instructions used to build a Doc
 
 Below is a basic dockerfile that allows us to build an image of any nodejs application
 
-```dockerfile
+```bash
 # Base image
 FROM node:16
 
@@ -118,7 +118,7 @@ CMD ["npm", "start"]
    ```
 # Dockerizing a nextjs app 
 Now that we’re familiar with Docker and Dockerfile, let's create a Docker image for a Next.js application. Below is the Dockerfile we’ll be using for this process.
-```dockerfile
+```bash
 FROM node:20
 
 WORKDIR /app
@@ -260,7 +260,7 @@ After executing the build command with the provided Dockerfile, the resulting im
 
 ## Strategies to Reduce Docker Image Size:
 1. **Use a Smaller Base Image**: The base image (node:20-alpine) in your current Dockerfile is already a lightweight version of Node.js, but let’s double-check that we are using the most minimal version.           Alpine is a great start because it’s only a few MBs.
-   ```dockerfile
+   ```bash
       FROM node:20-alpine
       
       WORKDIR /app
@@ -285,7 +285,7 @@ After executing the build command with the provided Dockerfile, the resulting im
 2. **Multistage Builds**: Docker allows you to use multiple phases in the Dockerfile to optimize the build process and reduce the final image size. By defining separate stages, such as one for installing dependencies, another for building the application, and a final stage for running it, you can ensure that only the essential files and dependencies are included in the final image. This approach avoids bloating the production image with build tools and unnecessary files, improving efficiency and performance. Each stage can selectively copy artifacts from previous stages, making the final image lean and more suitable for deployment.
 
       Here's the dockerfile that uses multistage build:
-   ```dockerfile
+   ```bash
    FROM node:20-alpine AS deps
    
    WORKDIR /app
@@ -344,7 +344,7 @@ After executing the build command with the provided Dockerfile, the resulting im
       ---
       
       ### Stage 2: `builder`
-      ```dockerfile
+      ```bash
       FROM node:20-alpine AS builder
       
       WORKDIR /app
