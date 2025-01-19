@@ -86,14 +86,14 @@ To keep users updated about the status of the virtual room, we can either use We
 
 | Feature                        | Server-Sent Events (SSE)        | WebSockets                       |
 |--------------------------------|----------------------------------|-----------------------------------|
-| Communication Type             | One-way (server-to-client)      | Bidirectional                    |
-| Implementation Complexity      | Simple                          | More complex                     |
-| Use Case Suitability           | Periodic updates (e.g., queue status) | Interactive real-time apps       |
-| Scalability                    | Efficient for large audiences   | More resource-intensive          |
-| Reconnection                   | Automatic (browser-handled)     | Manual implementation needed     |
-| Protocol                       | HTTP-based                      | Custom TCP-based protocol         |
-| Browser Support                | Modern browsers (text-only)     | Widely supported (text + binary) |
-| Data Format                    | Text-based (e.g., JSON)         | Text and binary supported        |
+| **Communication Type**         | One-way (server-to-client)      | Bidirectional                    |
+| **Implementation Complexity**  | Simple                          | More complex                     |
+| **Use Case Suitability**       | Periodic updates (e.g., queue status) | Interactive real-time apps       |
+| **Scalability**                | Efficient for large audiences   | More resource-intensive          |
+| **Reconnection**               | Automatic (browser-handled)     | Manual implementation needed     |
+| **Protocol**                   | HTTP-based                      | Custom TCP-based protocol         |
+| **Browser Support**            | Modern browsers (text-only)     | Widely supported (text + binary) |
+| **Data Format**                | Text-based (e.g., JSON)         | Text and binary supported        |
 
 For  **keeping users updated about their queue status**,  **SSE**  (Server-Sent Events) makes more sense, unless there is a need of two-way communication here.
 
