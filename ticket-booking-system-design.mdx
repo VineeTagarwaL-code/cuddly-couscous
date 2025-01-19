@@ -82,20 +82,13 @@ By leveraging NTP for timestamp synchronization, the system ensures that users a
 
 # WebSockets vs SSE
 
-To keep users updated about the status of the virtual room, we can either use WebSocket or SSE. Here is the difference between SSE and WebSocket:
+To keep users informed about the status of the virtual room, either WebSocket or SSE (Server-Sent Events) can be used, depending on the specific requirements.
 
-| Feature                        | Server-Sent Events (SSE)        | WebSockets                       |
-|--------------------------------|----------------------------------|-----------------------------------|
-| **Communication Type**         | One-way (server-to-client)      | Bidirectional                    |
-| **Implementation Complexity**  | Simple                          | More complex                     |
-| **Use Case Suitability**       | Periodic updates (e.g., queue status) | Interactive real-time apps       |
-| **Scalability**                | Efficient for large audiences   | More resource-intensive          |
-| **Reconnection**               | Automatic (browser-handled)     | Manual implementation needed     |
-| **Protocol**                   | HTTP-based                      | Custom TCP-based protocol         |
-| **Browser Support**            | Modern browsers (text-only)     | Widely supported (text + binary) |
-| **Data Format**                | Text-based (e.g., JSON)         | Text and binary supported        |
+SSE is ideal for one-way, server-to-client updates, such as periodic notifications about queue status. It is simpler to implement, more scalable for large audiences, and automatically handles reconnections via the browser. SSE uses HTTP and is designed for text-based data, making it efficient for lightweight updates.
 
-For  **keeping users updated about their queue status**,  **SSE**  (Server-Sent Events) makes more sense, unless there is a need of two-way communication here.
+On the other hand, WebSockets enable bidirectional communication, making them better suited for interactive real-time applications. However, they are more complex to implement, require manual reconnection handling, and are more resource-intensive. WebSockets operate over a custom TCP-based protocol and support both text and binary data.
+
+For updating users about their queue status, SSE is the preferred choice due to its simplicity and scalability, unless two-way communication is explicitly required.
 
 # Processing Queue
 
