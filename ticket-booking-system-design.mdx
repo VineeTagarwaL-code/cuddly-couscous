@@ -52,20 +52,15 @@ To address this issue, a centralized queue can be implemented in front of the se
 
 > NTP - It is basically a protocol designed to synchronize the clocks of devices over a network. It ensures that all connected devices have accurate and synchronized timestamps.
 
-To enhance scalability in a high-demand ticket booking system, implementing  **caching strategies**  and  **database optimization techniques** is crucial:
+To enhance scalability in a high-demand ticket booking system, implementing caching strategies and database optimization techniques is crucial:
 
-1.  **Caching Strategies**:
+## Caching Strategies
+- Use **Redis** or **Memcached** to cache frequently accessed data, such as event details, seat availability, and pricing information.
+- This reduces the load on the database by serving repeated queries directly from the cache, improving response times and overall system performance.
 
-•  Use  **Redis**  or  **Memcached**  to cache frequently accessed data, such as event details, seat availability, and pricing information.
-
-•  This reduces the load on the database by serving repeated queries directly from the cache, improving response times and overall system performance.
-
-2.  **Read Replicas and Eventual Consistency**:
-
-•  Deploy  **read replicas**  of  primary database to distribute the read workload across multiple nodes, ensures faster query performance during spikes.
-
-•  Leveraging  **eventual consistency**  to handle large-scale reads, especially for operations like real-time seat availability. While replicas may briefly lag behind the primary database, this trade-off is acceptable for many use cases where slight delays are tolerable.
-
+## Read Replicas and Eventual Consistency
+- Deploy **read replicas** of the primary database to distribute the read workload across multiple nodes, ensuring faster query performance during traffic spikes.
+- Leverage **eventual consistency** to handle large-scale reads, especially for operations like real-time seat availability. While replicas may briefly lag behind the primary database, this trade-off is acceptable for many use cases where slight delays are tolerable.
 # Virtual Rooms
 While users are in the queue, we can refer to this phase as  **“virtual rooms.”**  This is the space where users wait for their turn based on the  **First Come, First Serve (FCFS)**  principle, ranked by the  **global timestamp**  provided by  **NTP (Network Time Protocol)**. Using NTP ensures that all users are processed in a globally synchronized manner, eliminating discrepancies caused by clock drift across distributed systems.
 
