@@ -1,0 +1,204 @@
+---
+title: "A deep dive into the system design of ticket booking at a high scale"
+date: "2025-01-14"
+image: "https://github.com/user-attachments/assets/089d5142-f367-43b6-9b51-3b2842248146"
+tags: ["System Design","LLD","HLD"]
+---
+
+<details>
+  <summary>Content & Prerequisites</summary>
+
+  ## Prerequisites
+
+  - Basic understanding of system design concepts, including scalability, fault tolerance, and distributed systems.
+  - Familiarity with caching tools like Redis or Memcached.
+  - Awareness of queuing mechanisms and their role in distributed systems.
+  - Knowledge of protocols like Network Time Protocol (NTP) and their importance in synchronization.
+  - Understanding of web communication protocols such as WebSocket and Server-Sent Events (SSE).
+  - Optional: Experience with tools like Kubernetes, Docker, or cloud platforms for scaling and deploying services.
+
+  ## Content Overview
+  - [Introduction to Ticket Booking Systems](#ticket-booking-system)
+  - [Core Challenges](#core-challenges)
+  - [Handling Load](#handling-load)
+  - [Virtual Rooms and Fairness](#virtual-rooms)
+  - [WebSocket vs SSE](#websockets-vs-sse)
+  - [Processing the Queue](#processing-queue)
+  - [Seat Locking and User Fairness](#seat-locking)
+  - [Failover and Disaster Recovery](#failover-and-disaster-recovery)
+  - [Conclusion](#conclusion)
+
+</details>
+
+
+# Ticket Booking System 
+Ticket booking systems form the technical backbone of websites like BookMyShow, Ticketmaster, etc. They are the core infrastructure that enables these platforms to book tickets for specific events or shows. The real challenge lies in scaling to handle millions of users competing for a limited number of tickets. It is crucial to ensure accurate and synchronized ticket availability across all systems while maintaining fault tolerance, built-in disaster recovery mechanisms, and more. This blog will explore and address these challenges in detail.
+
+# Core Challenges
+1. **Handling Uncertain Spikes -** High Demand events can result in uncertain traffic spikes.
+2. **Millions of concurrent users -** Ensuring smooth performance even with high concurrency
+3. **Seat Lock -** Temporarily reserve seats, should be reliable and consistent
+4. **Real Time Seat Availibitliy Updates -** Despite high concurrecny, user should get real time update of the seat availibitliy
+
+# Handling Load
+When a single event attracts millions of users simultaneously, traditional server setups often fail, resulting in bottlenecks, race conditions, failures, inconsistent handling of user requests, and more. Scaling the server and adding more to the fleet of servers may help with the load but won’t solve the “fairness” issue.
+
+  
+
+While many users try to buy seats for the same event, ticketing companies need to be fair and at least give them a chance to purchase a ticket if they were the first to arrive. This is where they need to determine who came first. However, with a fleet of servers and clock synchronization issues between them, this becomes a significant challenge.
+
+
+To address this issue, a centralized queue can be implemented in front of the servers, utilizing Redis for maintaining the queue and Network Time Protocol (NTP) for assigning a globally synchronized timestamp. This ensures fairness by accurately determining the order of user requests, even across distributed systems.
+
+> NTP - It is basically a protocol designed to synchronize the clocks of devices over a network. It ensures that all connected devices have accurate and synchronized timestamps.
+
+To enhance scalability in a high-demand ticket booking system, implementing  **caching strategies**  and  **database optimization techniques** is crucial:
+
+1.  **Caching Strategies**:
+
+•  Use  **Redis**  or  **Memcached**  to cache frequently accessed data, such as event details, seat availability, and pricing information.
+
+•  This reduces the load on the database by serving repeated queries directly from the cache, improving response times and overall system performance.
+
+2.  **Read Replicas and Eventual Consistency**:
+
+•  Deploy  **read replicas**  of  primary database to distribute the read workload across multiple nodes, ensures faster query performance during spikes.
+
+•  Leveraging  **eventual consistency**  to handle large-scale reads, especially for operations like real-time seat availability. While replicas may briefly lag behind the primary database, this trade-off is acceptable for many use cases where slight delays are tolerable.
+
+# Virtual Rooms
+While users are in the queue, we can refer to this phase as  **“virtual rooms.”**  This is the space where users wait for their turn based on the  **First Come, First Serve (FCFS)**  principle, ranked by the  **global timestamp**  provided by  **NTP (Network Time Protocol)**. Using NTP ensures that all users are processed in a globally synchronized manner, eliminating discrepancies caused by clock drift across distributed systems.
+
+  
+
+During this phase:
+
+•  Users are ranked based on their  **NTP-synchronized timestamps**, ensuring fairness and consistency across the system.
+
+•  They are provided with their  **position in the queue**  and an  **estimated wait time**  based on real-time ticket processing speed.
+
+•  Updates about ticket availability and other relevant information are displayed to keep users informed using server sent events ( SSE ) 
+
+  
+
+By leveraging NTP for timestamp synchronization, the system ensures that users are fairly processed in the order they arrived, maintaining both integrity and trust in high-demand scenarios.
+
+
+
+# WebSockets vs SSE
+
+To keep users updated about the status of the virtual room, we can either use WebSocket or SSE. Here is the difference between SSE and WebSocket:
+
+| Feature                        | Server-Sent Events (SSE)        | WebSockets                       |
+|--------------------------------|----------------------------------|-----------------------------------|
+| Communication Type             | One-way (server-to-client)      | Bidirectional                    |
+| Implementation Complexity      | Simple                          | More complex                     |
+| Use Case Suitability           | Periodic updates (e.g., queue status) | Interactive real-time apps       |
+| Scalability                    | Efficient for large audiences   | More resource-intensive          |
+| Reconnection                   | Automatic (browser-handled)     | Manual implementation needed     |
+| Protocol                       | HTTP-based                      | Custom TCP-based protocol         |
+| Browser Support                | Modern browsers (text-only)     | Widely supported (text + binary) |
+| Data Format                    | Text-based (e.g., JSON)         | Text and binary supported        |
+
+For  **keeping users updated about their queue status**,  **SSE**  (Server-Sent Events) makes more sense, unless there is a need of two-way communication here.
+
+# Processing Queue
+
+To ensure fairness, efficiency, and scalability in processing of user request, it requires a well planned approach. Things to consider here : 
+
+
+1. **Fairness Through FCFS or Priority-Based Processing**:
+2. **Minimal Latency** 
+
+
+Keeping all of this in mind, we utilize  **batch processing**  to scale and handle millions of users efficiently while maintaining fairness through  **FCFS or priority-based ranking**. Requests are processed in a distributed fashion with a centralized queue to coordinate tasks among multiple servers. To ensure synchronized timing, we use NTP.
+
+# Seat Locking
+
+After the user is processed and reaches the final checkout page, their ticket price is locked for approximately 10 minutes. During this time, no one else can purchase the same ticket, and the locked price remains fixed.
+
+
+
+This is essential to ensure the following:
+
+1.  **No Race Conditions**: Prevents multiple users from attempting to purchase the same ticket simultaneously.
+
+2.  **Fairness to the User**: Guarantees that the user pays a single fixed price without any last-minute fluctuations.
+
+3.  **Exclusivity of Booking**: Ensures the ticket cannot be booked by more than one person during the lock period.
+
+4.  **Seamless User Experience**: Gives users adequate time to complete their transaction without fear of losing their selection.
+
+**Redis locks**  can be used here to ensure fairness and prevent race conditions in ticket booking systems. They work by locking a resource (e.g., a ticket) using a unique key. Only one user can acquire the lock at a time, ensuring no two users reserve the same ticket simultaneously. The lock has a  **Time-to-Live (TTL)**  to automatically release it if the user doesn’t complete the transaction in time.
+
+```js
+async function reserveTicket(ticketId, userId) {
+  const lockKey = `ticket:${ticketId}:lock`;
+  const ttl = 600; // Lock for 10 minutes (600 seconds)
+  const lockValue = userId; // Unique identifier for the user
+
+  // Try to acquire the lock
+  const acquired = await redis.set(lockKey, lockValue, 'NX', 'EX', ttl);
+
+  if (acquired) {
+    console.log(`Lock acquired by user ${userId} for ticket ${ticketId}`);
+
+    // Simulate completing the reservation
+    setTimeout(async () => {
+      // Release the lock after completing the booking
+      const currentLockValue = await redis.get(lockKey);
+      if (currentLockValue === lockValue) {
+        await redis.del(lockKey);
+        console.log(`Lock released by user ${userId}`);
+      }
+    }, 5000); // Simulate 5 seconds of processing
+
+    return true;
+  } else {
+    console.log(`Ticket ${ticketId} is already locked.`);
+    return false;
+  }
+}
+
+// Example Usage
+reserveTicket(123, 'user1');
+```
+
+# Disaster Recovery
+
+To ensure the reliability of a ticket booking system operating at a high scale, **failover mechanisms** and **disaster recovery strategies** are essential. These techniques help maintain uptime and data consistency even in the face of unexpected failures, such as server crashes or Redis outages.
+
+### **1. Fault Tolerance**
+
+#### Handling Server Crashes:
+- Use **load balancers** to detect and redirect traffic from failed servers to healthy instances automatically.
+- Employ **auto-scaling** groups to replace failed servers dynamically in cloud environments like AWS, GCP, or Azure.
+
+#### Redis Outages:
+- Use a **Redis Sentinel** setup for automatic failover. If the primary Redis instance goes down, Sentinel promotes a replica to primary, ensuring continuity (assuming that Redis Cluster is not being used).
+- Distribute Redis instances across different availability zones to prevent single points of failure.
+
+---
+
+### **2. Replication and Backup Systems**
+
+#### Data Replication:
+- Implement **real-time replication** for databases and caches to ensure data is available even if a primary node fails. For example:
+  - Use **Redis Replication** for read scalability and redundancy.
+  - Use database **read replicas** for fault tolerance and load distribution.
+
+#### Regular Backups:
+- Schedule regular backups of critical data, such as user transactions, ticket reservations, and event details.
+- Store backups in geographically distributed locations to protect against regional outages.
+
+---
+
+### **3. Disaster Recovery**
+
+#### Disaster Recovery Plans:
+- Maintain a **hot standby** system that mirrors your production environment and can be activated in case of catastrophic failures.
+- Define **Recovery Time Objective (RTO)** and **Recovery Point Objective (RPO)** to minimize downtime and data loss.
+- Periodically test the disaster recovery plan to ensure it works effectively during real incidents.
+# Conclusion
+
+Designing a ticket booking system at scale comes with its unique challenges, from handling millions of concurrent users to ensuring fairness and real-time updates. By leveraging techniques like centralized queuing with NTP, batch processing, and Redis-based locks, we can maintain efficiency and fairness even under extreme loads. Caching, replication, and robust failover mechanisms further enhance scalability and reliability, ensuring the system performs seamlessly. With these strategies in place, the system is well-equipped to handle high-demand events while providing a smooth and fair experience for all users.
