@@ -23,7 +23,7 @@ tags: ["System Design","LLD","HLD"]
   - [Handling Load](#handling-load)
   - [Virtual Rooms](#virtual-rooms)
   - [WebSocket vs SSE](#websockets-vs-sse)
-  - [Processing the Queue](#processing-queue)
+  - [Processing the Queue](#processing-the-queue)
   - [Seat Locking](#seat-locking)
   - [Disaster Recovery](#disaster-recovery)
   - [Conclusion](#conclusion)
@@ -93,7 +93,7 @@ On the other hand, WebSockets enable bidirectional communication, making them be
 
 For updating users about their queue status, SSE is the preferred choice due to its simplicity and scalability, unless two-way communication is explicitly required.
 
-# Processing Queue
+# Processing the Queue
 
 To ensure fairness, efficiency, and scalability in processing of user request, it requires a well planned approach. Things to consider here : 
 
